@@ -1,0 +1,713 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>阿p全自动发布工具</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%; overflow: hidden;
+    font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    background: #f0f2f5;
+  }
+
+  /* ---------- 顶栏 ---------- */
+  #bar {
+    height: 48px; display: flex; align-items: center; gap: 8px;
+    padding: 0 12px;
+    background: linear-gradient(180deg, #242c3b 0%, #1a212c 100%);
+    border-bottom: 1px solid #10151d;
+    box-shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 2px 8px rgba(0,0,0,.25);
+    user-select: none;
+  }
+  #brand { font-size: 17px; line-height: 1; filter: drop-shadow(0 1px 2px rgba(0,0,0,.4));
+    padding: 4px 7px; border-radius: 8px; cursor: pointer; transition: background .15s, transform .15s; }
+  #brand:hover { background: rgba(255,255,255,.12); transform: scale(1.06); }
+  #brand:active { transform: scale(.96); }
+
+  #tabs { display: flex; align-items: center; gap: 6px; overflow-x: auto; overflow-y: hidden; }
+  #tabs::-webkit-scrollbar { height: 0; }
+
+  .tab {
+    display: flex; align-items: center; gap: 7px;
+    height: 30px; padding: 0 6px 0 5px;
+    border-radius: 8px;
+    background: rgba(255,255,255,.065);
+    border: 1px solid rgba(255,255,255,.05);
+    color: #c3cbd8; font-size: 13px;
+    cursor: pointer; white-space: nowrap;
+    transition: background .15s, color .15s, border-color .15s;
+    max-width: 200px;
+  }
+  .tab:hover { background: rgba(255,255,255,.13); color: #e8eef7; }
+  .tab.dragging { opacity: .45; }
+  .tab.drag-over { outline: 2px dashed #60a5fa; outline-offset: -2px; }
+  .tab.active {
+    background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+    border-color: rgba(255,255,255,.22);
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(37,99,235,.45);
+  }
+  .tab .avatar {
+    width: 20px; height: 20px; flex: 0 0 20px;
+    border-radius: 6px; display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,.16); font-size: 11px; font-weight: 600;
+  }
+  .tab.active .avatar { background: rgba(255,255,255,.28); }
+  .tab .label { overflow: hidden; text-overflow: ellipsis; }
+  .tab .x {
+    width: 17px; height: 17px; flex: 0 0 17px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; font-size: 13px; line-height: 1;
+    opacity: .55;
+  }
+  .tab .x:hover { background: rgba(0,0,0,.22); opacity: 1; }
+
+  #add {
+    height: 30px; padding: 0 12px; flex: 0 0 auto;
+    border-radius: 8px; border: 1px dashed rgba(255,255,255,.34);
+    background: transparent; color: #9fb0c7;
+    font-size: 13px; cursor: pointer;
+    transition: border-color .15s, color .15s, background .15s;
+  }
+  #add:hover { border-color: #60a5fa; color: #bfdbfe; background: rgba(96,165,250,.08); }
+
+  #toolbar {
+    height: 38px; display: flex; align-items: center; gap: 4px;
+    padding: 0 12px;
+    background: #f7f9fc;
+    border-bottom: 1px solid #e6ebf2;
+    user-select: none;
+  }
+  #toolbar .navbtn { width: 28px; height: 26px; border-radius: 7px; }
+  #address {
+    flex: 1; margin-left: 6px; height: 24px; line-height: 24px;
+    padding: 0 10px; border-radius: 12px;
+    background: #fff; border: 1px solid #e6ebf2;
+    font-size: 11.5px; color: #64748b;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .navbtn {
+    border: none; background: transparent; color: #64748b;
+    font-size: 12px; cursor: pointer; transition: all .15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .navbtn:hover:not(:disabled) { background: #e8eef7; color: #1d4ed8; }
+  .navbtn:disabled { opacity: .28; cursor: default; }
+
+  #accounts-menu {
+    width: 26px; height: 30px; flex: 0 0 auto;
+    border-radius: 8px; border: 1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.06); color: #cbd5e1;
+    font-size: 11px; cursor: pointer;
+  }
+  #accounts-menu:hover { background: rgba(255,255,255,.14); color: #fff; }
+
+  #alarm {
+    height: 30px; padding: 0 12px; flex: 0 0 auto;
+    border-radius: 8px; border: 1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.06); color: #cbd5e1;
+    font-size: 13px; cursor: pointer; transition: all .15s;
+  }
+  #alarm:hover { border-color: #fbbf24; color: #fde68a; background: rgba(251,191,36,.12); }
+
+  #update {
+    height: 30px; padding: 0 12px; flex: 0 0 auto;
+    border-radius: 8px; border: 1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.06); color: #cbd5e1;
+    font-size: 13px; cursor: pointer; transition: all .15s;
+  }
+  #update:hover { border-color: #34d399; color: #a7f3d0; background: rgba(52,211,153,.12); }
+
+  #home {
+    width: 30px; height: 30px; flex: 0 0 auto;
+    border-radius: 8px; border: 1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.06); color: #cbd5e1;
+    font-size: 13px; cursor: pointer;
+  }
+  #home:hover { background: rgba(255,255,255,.14); color: #fff; }
+
+  #status {
+    margin-left: auto; padding-left: 14px;
+    font-size: 11px; color: #7f8da3;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 42%;
+  }
+
+  /* ---------- 内容区 ---------- */
+  /* 护眼模式（夜间） */
+  body.dark { background: #0f1620; }
+  body.dark #bar { background: linear-gradient(180deg, #0d141d 0%, #0a1017 100%); }
+  body.dark #toolbar { background: #131c27; border-bottom-color: #1d2a38; }
+  body.dark #address { background: #0d1621; border-color: #1d2a38; color: #7d93ad; }
+  body.dark .navbtn { color: #7d93ad; }
+  body.dark .navbtn:hover:not(:disabled) { background: #1b2836; color: #93c5fd; }
+  body.dark #empty { background: #0f1620; color: #5c718a; }
+
+  #views { position: absolute; top: 86px; left: 0; right: 0; bottom: 0; }
+  #views webview { width: 100%; height: 100%; border: 0; display: none; }
+  #views webview.active { display: flex; }
+
+  /* 后台渲染：所有账号都保持渲染，但只有当前账号可见（不动 display，脚本能正常跑） */
+  body.render-all:not(.tile) #views webview {
+    display: flex;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    visibility: hidden;
+    z-index: 1;
+  }
+  body.render-all:not(.tile) #views webview.active {
+    visibility: visible;
+    z-index: 2;
+  }
+
+  /* 并排模式：所有账号同时渲染，解决后台账号无法操作定时控件的问题 */
+  body.tile #views {
+    display: grid;
+    grid-template-columns: 1fr;          /* 默认上下分屏：宽度给足，番茄排版不会挤 */
+    grid-auto-rows: 1fr;
+    gap: 2px;
+    background: #0b1220;
+  }
+  body.tile.cols-2 #views { grid-template-columns: repeat(2, 1fr); }
+  body.tile #views webview {
+    display: flex;
+    position: static;
+    visibility: visible;
+    width: 100%;
+    height: 100%;
+    border: 1px solid #1d2a38;
+    border-radius: 4px;
+  }
+  body.tile #views webview:not(.active) { opacity: .96; }
+
+  #tile {
+    height: 30px; padding: 0 10px; flex: 0 0 auto;
+    border-radius: 8px; border: 1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.06); color: #cbd5e1;
+    font-size: 12px; cursor: pointer;
+  }
+  #tile:hover { background: rgba(255,255,255,.14); color: #fff; }
+  #tile.on { background: #2563eb; border-color: #2563eb; color: #fff; }
+
+  #tasks-view-btn {
+    height: 30px; padding: 0 12px; flex: 0 0 auto;
+    border-radius: 8px; border: 1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.06); color: #cbd5e1;
+    font-size: 13px; cursor: pointer; transition: all .15s;
+  }
+  #tasks-view-btn:hover { border-color: #60a5fa; color: #bfdbfe; background: rgba(96,165,250,.12); }
+  #tasks-view-btn.on { background: #2563eb; border-color: #2563eb; color: #fff; }
+
+  /* ---------- 多账号任务视图 ---------- */
+  #task-manager {
+    position: absolute; top: 86px; left: 0; right: 0; bottom: 0;
+    display: none; grid-template-columns: 380px 1fr;
+    background: #f0f2f5; z-index: 5;
+  }
+  body.task-view #task-manager { display: grid; }
+  /* 星月覆盖在日志列上面（同一层级） */
+  /* 星月打开时，弹窗遮罩调淡，避免把星月压成灰的 */
+  body.task-view #views { visibility: hidden; z-index: 0; }
+  body.dark #task-manager { background: #0f1620; }
+
+  .tm-side {
+    display: flex; flex-direction: column; min-height: 0;
+    background: #fff; border-right: 1px solid #e2e8f0;
+  }
+  body.dark .tm-side { background: #131c27; border-color: #1d2a38; }
+  .tm-side-head {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 14px; border-bottom: 1px solid #eef2f7;
+  }
+  body.dark .tm-side-head { border-color: #1d2a38; }
+  .tm-side-head h2 { margin: 0; font-size: 14px; font-weight: 500; color: #1e293b; }
+  body.dark .tm-side-head h2 { color: #e2e8f0; }
+  .tm-side-head .spacer { flex: 1; }
+  .tm-btn {
+    border: 1px solid #dbe3ee; background: #fff; color: #334155;
+    border-radius: 7px; padding: 5px 11px; font-size: 12px; cursor: pointer;
+  }
+  .tm-btn:hover { background: #f1f5f9; }
+  .tm-btn.primary { background: #2563eb; border-color: #2563eb; color: #fff; }
+  .tm-btn.primary:hover { background: #1d4ed8; }
+  .tm-btn.warn { background: #f59e0b; border-color: #f59e0b; color: #fff; }
+  .tm-btn.warn:hover { background: #d97706; }
+  .tm-btn.stop { color: #b91c1c; border-color: #fecaca; background: #fff5f5; }
+  .tm-btn.stop:hover { background: #fee2e2; }
+  .tm-btn.danger { color: #dc2626; border-color: #fecaca; }
+  .tm-btn:disabled { opacity: .5; cursor: default; }
+
+  .tm-list { flex: 1; overflow: auto; padding: 8px; }
+  .tm-empty { padding: 40px 16px; text-align: center; color: #94a3b8; font-size: 13px; line-height: 1.8; }
+  .tm-card {
+    border: 1px solid #e2e8f0; border-radius: 9px; padding: 10px 12px; margin-bottom: 8px;
+    background: #fff; cursor: pointer; transition: border-color .15s;
+  }
+  body.dark .tm-card { background: #18212e; border-color: #263549; }
+  .tm-card:hover { border-color: #93c5fd; }
+  .tm-card.selected { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,.12); }
+  .tm-card-top { display: flex; align-items: center; gap: 8px; }
+  .tm-book { font-size: 13px; font-weight: 500; color: #1e293b; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  body.dark .tm-book { color: #e2e8f0; }
+  .tm-badge { font-size: 10px; padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
+  .tm-badge.idle { background: #f1f5f9; color: #64748b; }
+  .tm-badge.running { background: #dbeafe; color: #1d4ed8; }
+  .tm-badge.paused { background: #fef3c7; color: #b45309; }
+  .tm-badge.done { background: #dcfce7; color: #15803d; }
+  .tm-badge.failed { background: #fee2e2; color: #b91c1c; }
+  .tm-badge.done::before,
+  .tm-badge.running::before,
+  .tm-badge.paused::before {
+    content: ''; display: inline-block; width: 5px; height: 5px; border-radius: 50%;
+    margin-right: 4px; vertical-align: 1px;
+  }
+  .tm-badge.done::before { background: #22c55e; }
+  .tm-badge.running::before { background: #3b82f6; }
+  .tm-badge.paused::before { background: #f59e0b; }
+  .tm-meta { margin-top: 6px; font-size: 11px; color: #94a3b8; display: flex; gap: 12px; flex-wrap: wrap; }
+  .tm-card-actions { margin-top: 9px; display: flex; gap: 6px; flex-wrap: wrap; }
+
+  /* 任务进度：目标总章节 / 当前进度 / 进度条 */
+  .tm-prog { margin-top: 8px; }
+  .tm-prog-stats { display: flex; gap: 7px; }
+  .tm-stat {
+    flex: 1 1 0; min-width: 0; padding: 6px 9px; border-radius: 8px;
+    background: #f8fafc; border: 1px solid #eef2f7;
+  }
+  body.dark .tm-stat { background: #101a26; border-color: #1e2c3d; }
+  .tm-stat-k { display: block; font-size: 10px; color: #94a3b8; line-height: 1.5; }
+  .tm-stat-v { display: block; font-size: 14px; font-weight: 600; color: #0f172a; line-height: 1.45; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  body.dark .tm-stat-v { color: #e6edf6; }
+  .tm-stat-s { display: block; font-size: 10px; color: #94a3b8; line-height: 1.5; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tm-prog-bar { margin-top: 7px; height: 6px; border-radius: 999px; background: #e8eef7; overflow: hidden; }
+  body.dark .tm-prog-bar { background: #1d2b3c; }
+  .tm-prog-fill { height: 100%; width: 0; border-radius: 999px; background: linear-gradient(90deg,#3b82f6,#60a5fa); transition: width .35s ease; }
+  .tm-prog-fill.full { background: linear-gradient(90deg,#22c55e,#4ade80); }
+  .tm-prog-fill.paused { background: linear-gradient(90deg,#f59e0b,#fbbf24); }
+  .tm-prog-foot { margin-top: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #94a3b8; }
+  .tm-prog-pct { color: #2563eb; font-weight: 600; }
+  .tm-prog-pct.full { color: #16a34a; }
+  .tm-prog-pct.paused { color: #d97706; }
+  /* 章节已被清空 */
+  .tm-prog-empty {
+    margin-top: 8px; padding: 9px 11px; border-radius: 8px; font-size: 11px; line-height: 1.7;
+    color: #64748b; background: #f8fafc; border: 1px dashed #dbe3ee;
+  }
+  body.dark .tm-prog-empty { background: #101a26; border-color: #2a3a4f; color: #94a3b8; }
+
+  .tm-main { display: flex; flex-direction: column; min-width: 0; min-height: 0; position: relative; }
+  .tm-main-head {
+    display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+    border-bottom: 1px solid #e2e8f0; background: #fff;
+  }
+  body.dark .tm-main-head { background: #131c27; border-color: #1d2a38; }
+  .tm-main-head h2 { margin: 0; font-size: 14px; font-weight: 500; color: #1e293b; }
+  body.dark .tm-main-head h2 { color: #e2e8f0; }
+  .tm-log-box {
+    flex: 1; overflow: auto; margin: 12px 16px 16px; padding: 12px 14px;
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 9px;
+    font-family: var(--font-mono); font-size: 12px; line-height: 1.7;
+  }
+  body.dark .tm-log-box { background: #101823; border-color: #1d2a38; }
+  /* 日志每一行整块带底色 + 左侧色条，成功/注意/错误一眼能区分 */
+  .tm-log-row {
+    display: flex; gap: 10px; align-items: baseline;
+    padding: 3px 8px; margin: 0 -4px 3px; border-radius: 6px;
+    border-left: 3px solid transparent; background: transparent;
+  }
+  .tm-log-row.lv-info { background: #f8fafc; border-left-color: #93c5fd; }
+  .tm-log-row.lv-success { background: #f0fdf4; border-left-color: #22c55e; }
+  .tm-log-row.lv-warning { background: #fffbeb; border-left-color: #f59e0b; }
+  .tm-log-row.lv-error { background: #fef2f2; border-left-color: #ef4444; }
+  body.dark .tm-log-row.lv-info { background: #16202c; border-left-color: #3b82f6; }
+  body.dark .tm-log-row.lv-success { background: #12251a; border-left-color: #22c55e; }
+  body.dark .tm-log-row.lv-warning { background: #2a2112; border-left-color: #f59e0b; }
+  body.dark .tm-log-row.lv-error { background: #2b1517; border-left-color: #ef4444; }
+  .tm-log-time { color: #94a3b8; flex: 0 0 auto; }
+  body.dark .tm-log-time { color: #64748b; }
+  .tm-log-tag { flex: 0 0 auto; font-weight: 500; }
+  .tm-log-tag.info { color: #2563eb; }
+  .tm-log-tag.success { color: #16a34a; }
+  .tm-log-tag.warning { color: #d97706; }
+  .tm-log-tag.error { color: #dc2626; }
+  body.dark .tm-log-tag.info { color: #60a5fa; }
+  body.dark .tm-log-tag.success { color: #4ade80; }
+  body.dark .tm-log-tag.warning { color: #fbbf24; }
+  body.dark .tm-log-tag.error { color: #f87171; }
+  /* 整行文字跟着级别上色：发布成功这类记录整句都是绿的 */
+  .tm-log-msg { color: #334155; word-break: break-word; }
+  .tm-log-msg.lv-info { color: #1e293b; }
+  .tm-log-msg.lv-success { color: #15803d; font-weight: 500; }
+  .tm-log-msg.lv-warning { color: #b45309; }
+  .tm-log-msg.lv-error { color: #b91c1c; font-weight: 500; }
+  body.dark .tm-log-msg { color: #cbd5e1; }
+  body.dark .tm-log-msg.lv-info { color: #e2e8f0; }
+  body.dark .tm-log-msg.lv-success { color: #4ade80; }
+  body.dark .tm-log-msg.lv-warning { color: #fbbf24; }
+  body.dark .tm-log-msg.lv-error { color: #fca5a5; }
+
+  /* 新增任务弹窗 */
+  #task-modal {
+    position: fixed; inset: 0; z-index: 70; background: rgba(10,18,30,.55);
+    display: none; align-items: center; justify-content: center;
+  }
+  #task-modal.show { display: flex; }
+  .task-box {
+    width: 620px; max-width: 94vw; max-height: 90vh; overflow: auto;
+    background: #fff; border-radius: 14px; padding: 22px 24px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.2);
+  }
+  body.dark .task-box { background: #18212e; }
+  .task-box h3 { margin: 0 0 16px; font-size: 16px; font-weight: 500; color: #1e293b; }
+  body.dark .task-box h3 { color: #e2e8f0; }
+  .tf-row { margin-bottom: 13px; }
+  .tf-row label { display: block; font-size: 12px; color: #64748b; margin-bottom: 5px; }
+  .tf-row select, .tf-row input, .tf-row textarea {
+    width: 100%; box-sizing: border-box; padding: 8px 10px;
+    border: 1px solid #dbe3ee; border-radius: 7px; font-size: 13px;
+    background: #fff; color: #1e293b; font-family: inherit;
+  }
+  body.dark .tf-row select, body.dark .tf-row input, body.dark .tf-row textarea {
+    background: #101823; border-color: #2a3a4f; color: #e2e8f0;
+  }
+  .tf-row textarea { resize: vertical; min-height: 90px; font-family: var(--font-mono); }
+  .tf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .tf-hint { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+  .tf-label-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 5px; }
+  .tf-label-row label { display: block; font-size: 12px; color: #64748b; margin: 0; flex: 1; min-width: 0; }
+  .tf-label-row .tm-btn { flex: none; padding: 3px 10px; font-size: 11px; }
+  .tf-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+  .tf-load { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+  .tf-load input[type=file] { flex: 1; }
+  .tf-books { display: flex; gap: 8px; }
+  .tf-books select { flex: 1; }
+
+  #empty {
+    position: absolute; top: 86px; left: 0; right: 0; bottom: 0;
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    gap: 10px; color: #94a3b8; background: #f7f9fc;
+  }
+  #empty.show { display: flex; }
+  #empty .big { font-size: 34px; opacity: .55; }
+  #empty .tip { font-size: 13px; }
+
+  /* ---------- 更新弹窗 ---------- */
+  #update-modal {
+    position: fixed; inset: 0; z-index: 60;
+    background: rgba(10, 18, 30, .55);
+    display: none; align-items: center; justify-content: center;
+  }
+  #update-modal.show { display: flex; }
+  #update-box {
+    width: 360px; padding: 22px 22px 18px;
+    background: #fff; border-radius: 14px; text-align: center;
+    box-shadow: 0 24px 60px rgba(0,0,0,.35);
+    animation: umIn .2s ease-out;
+  }
+  @keyframes umIn { from { transform: scale(.94); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  body.dark #update-box { background: #1a2431; color: #e5edf8; }
+  #update-box .um-ic { font-size: 30px; }
+  #update-box h3 { margin: 8px 0 6px; font-size: 15px; font-weight: 600; }
+  #um-ver { font-size: 12px; color: #64748b; }
+  body.dark #um-ver { color: #93a4ba; }
+  #um-notes {
+    margin: 12px 0 4px; padding: 10px 12px; text-align: left;
+    font-size: 12px; line-height: 1.7; color: #475569;
+    background: #f7f9fc; border-radius: 8px; border: 1px solid #eef2f7;
+    max-height: 110px; overflow-y: auto;
+  }
+  body.dark #um-notes { background: #141d28; border-color: #253242; color: #9fb3ce; }
+  #um-progress { display: none; margin-top: 14px; }
+  #um-progress.show { display: block; }
+  #um-bar {
+    height: 8px; border-radius: 5px; overflow: hidden;
+    background: #e8eef7; position: relative;
+  }
+  #um-bar-fill {
+    display: block; height: 100%; width: 0%;
+    border-radius: 5px;
+    background: linear-gradient(90deg, #60a5fa, #2563eb);
+    transition: width .18s linear;
+  }
+  #um-pct { margin-top: 6px; font-size: 11px; color: #64748b; text-align: right; }
+  body.dark #um-bar { background: #22303f; }
+  body.dark #um-pct { color: #8ba1ba; }
+
+  .um-actions { display: flex; gap: 8px; margin-top: 14px; }
+  .um-actions button { flex: 1; height: 34px; border-radius: 8px; font-size: 13px; cursor: pointer; border: 1px solid transparent; }
+  #um-later { background: #f1f5f9; color: #475569; border-color: #e2e8f0; }
+  #um-later:hover { background: #e2e8f0; }
+  #um-go { background: linear-gradient(180deg,#3b82f6,#2563eb); color: #fff; font-weight: 600; }
+  #um-go:hover { filter: brightness(1.08); }
+  #um-go:disabled { opacity: .5; cursor: default; }
+  #um-tip { margin-top: 10px; font-size: 10.5px; color: #94a3b8; }
+
+  /* ---------- 重命名弹层 ---------- */
+  #rename-mask {
+    position: fixed; inset: 0; z-index: 20;
+    background: rgba(15,23,42,.45);
+    display: none; align-items: center; justify-content: center;
+  }
+  #rename-mask.show { display: flex; }
+  #rename-box {
+    width: 320px; background: #fff; border-radius: 12px;
+    box-shadow: 0 18px 48px rgba(0,0,0,.3);
+    padding: 20px 20px 16px;
+  }
+  #rename-box h3 { margin: 0 0 12px; font-size: 15px; font-weight: 600; color: #1f2937; }
+  #rename-input {
+    width: 100%; height: 36px; padding: 0 10px;
+    border: 1px solid #d9dee7; border-radius: 8px;
+    font-size: 13px; color: #1f2937; outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  #rename-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.15); }
+  #rename-tip { margin-top: 6px; font-size: 11px; color: #94a3b8; }
+  #rename-actions { margin-top: 16px; display: flex; justify-content: flex-end; gap: 8px; }
+  #rename-actions button {
+    height: 32px; padding: 0 16px; border-radius: 8px;
+    font-size: 13px; cursor: pointer; border: 1px solid transparent;
+  }
+  #rename-cancel { background: #f1f5f9; color: #475569; border-color: #e2e8f0; }
+  #rename-cancel:hover { background: #e2e8f0; }
+  #rename-ok { background: #2563eb; color: #fff; }
+  #rename-ok:hover { background: #1d4ed8; }
+
+  /* ---------- 右键菜单 ---------- */
+  #ctxmenu {
+    position: fixed; z-index: 30; min-width: 150px;
+    background: #fff; border: 1px solid #e5e9f0; border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(15,23,42,.18);
+    padding: 6px; display: none;
+  }
+  #ctxmenu.show { display: block; }
+  .ctx-item {
+    padding: 8px 10px; border-radius: 6px;
+    font-size: 13px; color: #334155; cursor: pointer; white-space: nowrap;
+  }
+  .ctx-item:hover { background: #eff6ff; color: #1d4ed8; }
+  .ctx-item.danger { color: #dc2626; }
+  .ctx-item.danger:hover { background: #fef2f2; color: #b91c1c; }
+  .ctx-sep { height: 1px; background: #eef2f7; margin: 4px 2px; }
+
+  #tf-xy-chapters .xy-ch-row { display: block !important; width: 100% !important; box-sizing: border-box !important;
+    padding: 6px 4px !important; text-align: left !important; white-space: normal !important;
+    word-break: break-word !important; line-height: 1.6 !important; font-size: 13px !important; cursor: pointer !important; }
+  #tf-xy-chapters .xy-ch-row input[type=checkbox] { float: none !important; display: inline-block !important;
+    margin: 0 8px 0 0 !important; vertical-align: middle !important; position: static !important; }
+  #tf-xy-chapters .xy-ch-row span { display: inline !important; float: none !important; position: static !important;
+    text-align: left !important; }
+</style>
+</head>
+<body>
+  <div id="bar">
+    <div id="brand" title="设置">🐋</div>
+    <div id="tabs"></div>
+    <button id="add" title="新建账号（Ctrl+T）">＋ 账号</button>
+    <button id="accounts-menu" title="打开已关闭的账号">▾</button>
+    <button id="tasks-view-btn" title="多账号发布任务管理">📋 任务</button>
+    <button id="alarm" title="存稿 & 更新看板">📊 看板</button>
+    <button id="earnings" title="收益">💰 收益</button>
+    <button id="tile" title="并排：让所有账号同时渲染，适合多账号同时定时发布">⊞ 并排</button>
+    <button id="update" title="检查更新">⏫ 更新</button>
+    <button id="home" title="回到首页">🏠</button>
+    <div id="status"></div>
+  </div>
+
+  <div id="toolbar">
+    <button class="navbtn" id="nav-back" title="后退（Alt+←）">◀</button>
+    <button class="navbtn" id="nav-forward" title="前进（Alt+→）">▶</button>
+    <button class="navbtn" id="nav-reload" title="刷新（F5）">⟳</button>
+    <button class="navbtn" id="nav-home" title="回到作家专区首页">⌂</button>
+    <div id="address" title="当前页面"><span id="addr-text">—</span></div>
+  </div>
+
+  <div id="load-fail">
+    <div class="lf-box">
+      <div class="lf-ic">😵</div>
+      <div class="lf-title" id="lf-title">页面没加载出来</div>
+      <div class="lf-desc" id="lf-desc">可能是网络波动，或者番茄那边暂时打不开。</div>
+      <div class="lf-actions">
+        <button id="lf-reload">重新加载</button>
+        <button id="lf-home">回首页</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="views"></div>
+
+  <!-- 多账号任务管理视图：左任务栏 + 右日志 -->
+  <div id="task-manager">
+    <div class="tm-side">
+      <div class="tm-side-head">
+        <h2>发布任务</h2>
+        <div class="spacer"></div>
+        <button class="tm-btn" id="tm-xingyue" title="打开星月写作">📖 星月写作</button>
+        <button class="tm-btn" id="tm-xy-sync" title="读取星月里的作品列表">⤓ 同步作品</button>
+        <button class="tm-btn primary" id="tm-add">＋ 新增任务</button>
+      </div>
+      <div class="tm-list" id="tm-list">
+        <div class="tm-empty">还没有任务<br>点右上角「＋ 新增任务」创建一个</div>
+      </div>
+    </div>
+    <div class="tm-main">
+      <div class="tm-main-head">
+        <h2>运行日志（所有账号 / 所有书）</h2>
+        <div class="spacer" style="flex:1"></div>
+        <button class="tm-btn" id="tm-log-clear">清空日志</button>
+      </div>
+  <!-- 星月写作：铺满内容区，作为背景层 -->
+
+
+      <div class="tm-log-box" id="tm-log-box">
+        <div class="tm-empty" style="padding:20px">暂无日志。开启任务后，各账号的发布过程会实时汇总到这里。</div>
+      </div>
+    </div>
+
+
+  </div>
+
+  <!-- 新增任务弹窗 -->
+  <div id="task-modal">
+    <div class="task-box">
+      <h3>新增发布任务</h3>
+      <div class="tf-row">
+        <label>① 选择账号</label>
+        <select id="tf-slot"></select>
+        <div class="tf-hint">选好账号后点「读取书单」，会自动从该账号的作品管理页拉取书。</div>
+      </div>
+      <div class="tf-row">
+        <label>② 选书</label>
+        <div class="tf-books">
+          <select id="tf-book"></select>
+          <button class="tm-btn" id="tf-load-books">读取书单</button>
+        </div>
+        <div class="tf-hint" id="tf-book-hint">也可以直接填书号（从书页网址里复制那串数字）。</div>
+        <input id="tf-bookid" placeholder="书号（可选，填了以这个为准）" style="margin-top:6px">
+      </div>
+      <div class="tf-row">
+        <div class="tf-label-row">
+          <label>③ 章节内容（粘贴正文或选 TXT，按「第X章」自动切分）</label>
+          <button class="tm-btn" id="tf-clear-chapters" type="button">清空</button>
+        </div>
+        <textarea id="tf-content" placeholder="第一章 标题&#10;正文内容……&#10;&#10;第二章 标题&#10;正文内容……"></textarea>
+        <div class="tf-load">
+          <input type="file" id="tf-file" accept=".txt">
+        </div>
+        <div class="tf-hint" id="tf-parse-hint">还没解析章节</div>
+      </div>
+
+      <!-- 星月写作（独立区块，与番茄书单分开） -->
+      <div class="tf-row" id="tf-xy-block" style="border:1px dashed #cfe0f5; border-radius:10px; padding:10px; margin-top:6px;">
+        <label style="display:flex; justify-content:space-between; align-items:center;">
+          <span>④ 从星月写作导入章节（可选）</span>
+          <span style="font-size:12px; color:#8aa0bd;">先在这里登录星月，再读作品</span>
+        </label>
+        <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
+          <select id="xy-site" title="选择写作网站" style="flex:0 0 120px;">
+            <option value="xingyue">星月写作</option>
+            <option value="miaobi">妙笔写作</option>
+          </select>
+          <select id="tf-xy-book" style="flex:1;"></select>
+          <button class="tm-btn" id="tf-xy-load" type="button">读取星月作品</button>
+          <button class="tm-btn" id="tf-xy-open" type="button">打开作品</button>
+          <button class="tm-btn" id="tf-xy-openwin" type="button" title="打开星月写作窗口">打开星月</button>
+        </div>
+        <div class="tf-hint" id="tf-xy-hint">选好书后点「打开作品」，它会像真人一样点进这本书。</div>
+        <div style="display:flex; gap:8px; margin-top:8px; align-items:center;">
+          <button class="tm-btn" id="tf-xy-load-chapters" type="button">读取章节</button>
+          <button class="tm-btn primary" id="tf-xy-grab" type="button">导入所选章节</button>
+          <button class="tm-btn" id="tf-xy-import" type="button" title="只复制当前打开的这章">📋 只复制当前章</button>
+          <span id="tf-xy-count" style="font-size:12px;color:#8aa0bd;"></span>
+        </div>
+        <div style="display:flex; gap:6px; margin-top:6px; flex-wrap:wrap;">
+          <button class="tm-btn" id="xy-sel-all" type="button" style="padding:4px 10px;font-size:12px;">全选</button>
+          <button class="tm-btn" id="xy-sel-invert" type="button" style="padding:4px 10px;font-size:12px;">反选</button>
+          <button class="tm-btn" id="xy-sel-first5" type="button" style="padding:4px 10px;font-size:12px;">前5章</button>
+          <button class="tm-btn" id="xy-sel-last5" type="button" style="padding:4px 10px;font-size:12px;">后5章</button>
+          <button class="tm-btn" id="xy-sel-first10" type="button" style="padding:4px 10px;font-size:12px;">前10章</button>
+          <button class="tm-btn" id="xy-sel-last10" type="button" style="padding:4px 10px;font-size:12px;">后10章</button>
+        </div>
+        <div id="tf-xy-chapters" style="display:none; max-height:180px; overflow-y:auto; overflow-x:hidden; border:1px solid #e5ecf5; border-radius:8px; margin-top:8px; padding:6px; text-align:left; white-space:normal; word-break:break-word;"></div>
+      </div>
+      <div class="tf-grid">
+        <div class="tf-row">
+          <label>定时发布</label>
+          <select id="tf-timed"><option value="yes">定时发布</option><option value="no">立即发布</option></select>
+        </div>
+        <div class="tf-row">
+          <label>开始日期</label>
+          <input type="date" id="tf-date">
+        </div>
+        <div class="tf-row">
+          <label>开始时间</label>
+          <input type="time" id="tf-time" value="08:00">
+        </div>
+        <div class="tf-row">
+          <label>每天章数</label>
+          <input type="number" id="tf-daily" value="3" min="1">
+        </div>
+        <div class="tf-row">
+          <label>章节间隔(分钟)</label>
+          <input type="number" id="tf-interval" value="0" min="0">
+        </div>
+        <div class="tf-row">
+          <label>跳过周末</label>
+          <select id="tf-weekend"><option value="no">否</option><option value="yes">是</option></select>
+        </div>
+      </div>
+      <div class="tf-actions">
+        <button class="tm-btn" id="tf-cancel">取消</button>
+        <button class="tm-btn primary" id="tf-save">完成</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="empty" class="show">
+    <div class="big">🐋</div>
+    <div class="tip">还没有账号，点左上角「＋ 账号」开始</div>
+  </div>
+
+  <div id="update-modal">
+    <div id="update-box">
+      <div class="um-ic">⬆️</div>
+      <h3 id="um-title">发现新版本</h3>
+      <div id="um-ver"></div>
+      <div id="um-notes"></div>
+      <div id="um-progress">
+        <div id="um-bar"><i id="um-bar-fill"></i></div>
+        <div id="um-pct">0%</div>
+      </div>
+      <div class="um-actions">
+        <button id="um-later">暂不更新</button>
+        <button id="um-go">立即更新</button>
+      </div>
+      <div id="um-tip">更新只替换程序文件，不会动你的账号和作品数据</div>
+    </div>
+  </div>
+
+  <div id="rename-mask">
+    <div id="rename-box">
+      <h3>给这个账号起个名字</h3>
+      <input id="rename-input" maxlength="20" placeholder="例如：主号 / 备用 / 小号">
+      <div id="rename-tip">留空则恢复默认的「账号 N」。双击标签或右键菜单都能改名。</div>
+      <div id="rename-actions">
+        <button id="rename-cancel">取消</button>
+        <button id="rename-ok">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="ctxmenu">
+    <div class="ctx-item" data-act="rename">重命名</div>
+    <div class="ctx-item" data-act="close">关闭标签</div>
+    <div class="ctx-sep"></div>
+    <div class="ctx-item danger" data-act="delete">彻底删除账号</div>
+  </div>
+
+  <script src="./shell.js"></script>
+  <script src="xingyue-ui.js"></script>
+</body>
+</html>

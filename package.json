@@ -1,0 +1,55 @@
+{
+  "name": "ap-novel-uploader-mac",
+  "productName": "阿p全自动发布工具",
+  "version": "2.9.58",
+  "description": "番茄小说作者后台批量上传章节 桌面版（macOS）",
+  "author": "阿日",
+  "license": "MIT",
+  "main": "app/main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:mac": "electron-builder --mac dmg --x64 --arm64 --publish never"
+  },
+  "devDependencies": {
+    "electron": "44.10.1",
+    "electron-builder": "latest"
+  },
+  "build": {
+    "appId": "com.ari.apuploader",
+    "productName": "阿p全自动发布工具",
+    "asar": true,
+    "npmRebuild": false,
+    "files": [
+      "app/**/*",
+      "package.json",
+      "!**/*.pem",
+      "!**/*.log"
+    ],
+    "directories": {
+      "buildResources": "build",
+      "output": "dist"
+    },
+    "artifactName": "ap-uploader-${version}-mac-${arch}.${ext}",
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.png",
+      "identity": null,
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
+      ]
+    },
+    "dmg": {
+      "title": "阿p全自动发布工具 ${version}",
+      "iconSize": 110,
+      "contents": [
+        { "x": 150, "y": 190 },
+        { "x": 420, "y": 190, "type": "link", "path": "/Applications" }
+      ]
+    }
+  }
+}

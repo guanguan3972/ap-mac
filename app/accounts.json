@@ -1,0 +1,62 @@
+{
+  "updated": "2026-11-23",
+  "note": "管理员可用 make-account.js 生成条目后粘贴进 users",
+  "users": [
+    {
+      "user": "guanguan",
+      "pass": "9762989567cbf268b55792d6c4f3a9a176c901f035c411255dfd12ad6bf723e1",
+      "note": "管理员",
+      "admin": true,
+      "multiDevice": true
+    },
+    {
+      "user": "xhs",
+      "pass": "54b9dd64223888e4df48095b029a2cacf4ca3bf47afe0609295ac974b1e0d93b",
+      "note": "白名单：不限机器",
+      "admin": false,
+      "multiDevice": true
+    },
+    {
+      "user": "huanle",
+      "pass": "4cd731cac1a6dfb03d002b5214f49bf66e19d5ce54fda5006016d6acf7e71f89",
+      "note": "白名单：不限机器",
+      "admin": false,
+      "multiDevice": true
+    },
+    {
+      "user": "pfy",
+      "pass": "dd2db6820afc75dd2be6ff32ea7f8fbdf00934e372098d4ee9206d1c6ef00cab",
+      "note": "白名单：不限机器",
+      "admin": false,
+      "multiDevice": true
+    },
+    {
+      "user": "tgxx",
+      "pass": "950216aaf7594d03bae2241893124a313cd9f517e8cdc993cbeeed8cec984c73",
+      "note": "白名单：不限机器",
+      "admin": false,
+      "multiDevice": true
+    },
+    {
+      "user": "lxj",
+      "pass": "90da973752d7c64f1322a3ccec729c2ff0d3af37f7574aa9b6f8b2b6b06113fd",
+      "note": "白名单：不限机器",
+      "admin": false,
+      "multiDevice": true
+    },
+    {
+      "user": "lily",
+      "pass": "91b4d142823f7d20c5f08df69122de43f35f057a988d9619f6d3138485c9a203",
+      "note": "白名单：不限机器",
+      "admin": false,
+      "multiDevice": true
+    },
+    {
+      "user": "pznb",
+      "pass": "3f05773d61183795f552528e8446ed1bb0ede63d1c26a7e6b06f81b64c73d8c4",
+      "note": "白名单：不限机器",
+      "admin": false,
+      "multiDevice": true
+    }
+  ]
+}

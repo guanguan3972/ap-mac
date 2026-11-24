@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>收益</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin:0; height:100%; font-family:"Microsoft YaHei",system-ui,sans-serif; background:#f7f9fc; color:#1f2937; user-select:none; }
+  #wrap { padding:16px 18px; }
+  h1 { margin:0 0 12px; font-size:15px; }
+  .card { background:#fff; border:1px solid #eef2f7; border-radius:12px; padding:14px; margin-bottom:12px; }
+  .big { font-size:26px; font-weight:700; color:#16a34a; }
+  .sub { font-size:11.5px; color:#94a3b8; margin-top:4px; }
+  .row { display:flex; gap:8px; margin-top:10px; }
+  input { flex:1; height:30px; padding:0 10px; border:1px solid #e2e8f0; border-radius:8px; font-size:13px; }
+  button { height:30px; padding:0 12px; border-radius:8px; border:1px solid #e2e8f0; background:#fff; color:#475569; font-size:12px; cursor:pointer; }
+  button.primary { background:#2563eb; border-color:#2563eb; color:#fff; }
+  table { width:100%; border-collapse:collapse; font-size:12px; }
+  th, td { text-align:left; padding:6px 4px; border-bottom:1px solid #f2f5f9; }
+  th { color:#94a3b8; font-weight:500; }
+  .num { font-family:Consolas,monospace; }
+  .empty { font-size:12px; color:#94a3b8; text-align:center; padding:14px; }
+</style>
+</head>
+<body>
+  <div id="wrap">
+    <h1>💰 收益</h1>
+
+    <div class="card">
+      <div style="font-size:12px;color:#64748b;">今日收益</div>
+      <div class="big" id="income">¥0.00</div>
+      <div class="sub" id="stats">更新 0 章 · 0 字 · 0 本书</div>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <input id="mname" type="text" placeholder="名称（书名/备注，可不填）" style="flex:0 0 42%;">
+        <input id="manual" type="text" placeholder="金额，如 12.48" style="flex:1;">
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button class="primary" id="save" style="flex:1;">添加</button>
+        <button id="set-total" style="flex:1;" title="把这个数字直接当作今天的总额，覆盖明细">设为总额</button>
+        <button id="finish" style="flex:1;background:#16a34a;border-color:#16a34a;color:#fff;">完成今日</button>
+      </div>
+      <div class="sub">从番茄「收益概览」里看到的数字，填进来保存即可</div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;align-items:center;margin-bottom:8px;">
+        <div style="font-size:12.5px;font-weight:600;">最近 7 天</div>
+        <button id="refresh" style="margin-left:auto;">刷新</button>
+      </div>
+      <table>
+        <thead><tr><th>日期</th><th>章数</th><th>字数</th><th>收益</th></tr></thead>
+        <tbody id="days"></tbody>
+      </table>
+    </div>
+  </div>
+  <script src="./earnings.js"></script>
+</body>
+</html>

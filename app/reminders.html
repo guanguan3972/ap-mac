@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>存稿 & 更新看板</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    background: #f7f9fc; color: #1f2937;
+    user-select: none;
+  }
+  #head {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 14px 8px;
+    border-bottom: 1px solid #e8eef6;
+  }
+  #head h1 { margin: 0; font-size: 14px; font-weight: 600; }
+  #head .sub { font-size: 11px; color: #94a3b8; }
+  #refresh {
+    margin-left: auto; height: 26px; padding: 0 10px;
+    border-radius: 6px; border: 1px solid #e2e8f0; background: #fff;
+    color: #475569; font-size: 12px; cursor: pointer;
+  }
+  #refresh:hover { border-color: #93c5fd; color: #1d4ed8; }
+
+  #stats { display: flex; gap: 6px; padding: 8px 12px 2px; flex-wrap: wrap; }
+  .chip {
+    font-size: 11px; padding: 2px 8px; border-radius: 10px;
+    background: #eef2f7; color: #475569;
+  }
+  .chip.hot { background: #fee2e2; color: #b91c1c; }
+  .chip.warn { background: #fff7ed; color: #c2410c; }
+  .chip.ok { background: #ecfdf5; color: #047857; }
+  .chip.today-stat { background: #eff6ff; color: #1d4ed8; font-weight: 600; width: 100%; text-align: center; }
+
+  .group { margin: 10px 0 4px; font-size: 11.5px; color: #64748b; font-weight: 600; }
+
+  #list { position: absolute; top: 84px; left: 0; right: 0; bottom: 26px; overflow-y: auto; padding: 4px 12px 16px; }
+
+  .item {
+    background: #fff; border: 1px solid #e8eef6; border-radius: 10px;
+    padding: 11px 12px; margin-bottom: 9px;
+    box-shadow: 0 1px 2px rgba(15,23,42,.04);
+    position: relative;
+  }
+  .item.soon { border-color: #fdba74; background: #fffbf5; }
+  .item.today { border-color: #f87171; background: #fff5f5; }
+
+  .row1 { display: flex; align-items: baseline; gap: 6px; }
+  .book { font-size: 13px; font-weight: 600; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: text; border-bottom: 1px dashed transparent; }
+  .book:hover { border-bottom-color: #93c5fd; }
+  .lastch {
+    font-size: 11px; color: #2563eb; background: #eff6ff;
+    border: 1px solid #bfdbfe; border-radius: 9px; padding: 1px 7px;
+  }
+
+  .acc { font-size: 11px; color: #64748b; background: #eef2f7; border-radius: 4px; padding: 1px 6px; flex: 0 0 auto; }
+
+  .row2 { margin-top: 7px; display: flex; align-items: center; gap: 8px; }
+  .date { font-size: 12px; color: #334155; font-family: Consolas, monospace; }
+  .badge { font-size: 11px; padding: 1px 7px; border-radius: 10px; background: #eff6ff; color: #1d4ed8; }
+  .badge.warn { background: #fff7ed; color: #c2410c; }
+  .badge.hot { background: #fee2e2; color: #b91c1c; }
+  .meta { margin-top: 6px; font-size: 11px; color: #94a3b8; }
+
+  .book-input {
+    flex: 1; min-width: 60px; height: 22px; padding: 0 6px;
+    font-size: 13px; font-weight: 600;
+    border: 1px solid #93c5fd; border-radius: 5px; outline: none;
+    background: #fff; color: #0f172a;
+  }
+
+  .del {
+    flex: 0 0 auto; margin-left: 8px;
+    padding: 2px 8px; border-radius: 10px;
+    font-size: 11px; color: #ef4444; background: #fef2f2;
+    border: 1px solid #fecaca; cursor: pointer;
+  }
+  .del:hover { background: #fee2e2; }
+
+  #foot {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    height: 26px; line-height: 26px;
+    padding: 0 12px; font-size: 10.5px; color: #94a3b8;
+    background: #f7f9fc; border-top: 1px solid #eef2f7;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+
+  #empty { text-align: center; color: #94a3b8; font-size: 12px; padding: 40px 20px; line-height: 1.9; }
+  #empty .big { font-size: 30px; opacity: .5; display: block; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+  <div id="head">
+    <h1>存稿 &amp; 更新看板</h1>
+    <span class="sub" id="sub"></span>
+    <button id="refresh">刷新</button>
+  </div>
+  <div id="stats"></div>
+  <div id="list"></div>
+  <div id="foot"></div>
+
+  <script src="./reminders.js"></script>
+</body>
+</html>

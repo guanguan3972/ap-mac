@@ -1,0 +1,9 @@
+{
+  "name": "xiaobai-novel-uploader",
+  "productName": "阿p全自动发布工具",
+  "version": "2.9.58",
+  "description": "番茄小说作者后台批量上传章节 桌面版",
+  "main": "main.js",
+  "author": "local",
+  "license": "MIT"
+}

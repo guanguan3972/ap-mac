@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>检查更新</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%;
+    font-family: "Microsoft YaHei", system-ui, sans-serif;
+    background: #f7f9fc; color: #1f2937; user-select: none;
+  }
+  #wrap { padding: 18px 20px; }
+  h1 { margin: 0 0 4px; font-size: 15px; font-weight: 600; }
+  .sub { font-size: 12px; color: #94a3b8; margin-bottom: 16px; }
+  .row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 12px; }
+  .row .k { color: #64748b; flex: 0 0 68px; }
+  .row .v { color: #0f172a; font-family: Consolas, monospace; }
+  #feed {
+    width: 100%; height: 30px; padding: 0 8px; font-size: 11px;
+    border: 1px solid #e2e8f0; border-radius: 6px; background: #fff;
+    color: #334155; outline: none;
+  }
+  #feed:focus { border-color: #93c5fd; }
+  #btn-save, #btn-reset { height: 30px; padding: 0 10px; border-radius: 6px; border: 1px solid #e2e8f0; background: #fff; color: #475569; font-size: 12px; cursor: pointer; }
+  #btn-save:hover, #btn-reset:hover { border-color: #93c5fd; color: #1d4ed8; }
+  #progress-wrap { display: none; margin: 10px 0 4px; }
+  #progress-wrap.show { display: block; }
+  #bar { height: 8px; border-radius: 5px; overflow: hidden; background: #e8eef7; }
+  #bar-fill { display: block; height: 100%; width: 0%; border-radius: 5px;
+    background: linear-gradient(90deg, #60a5fa, #2563eb); transition: width .18s linear; }
+  #bar-text { margin-top: 6px; font-size: 11px; color: #64748b; text-align: right; }
+
+  #note { min-height: 34px; padding: 8px 10px; margin: 12px 0; font-size: 12px; color: #475569; background: #fff; border: 1px solid #eef2f7; border-radius: 8px; line-height: 1.6; }
+  #note.ok { color: #15803d; border-color: #bbf7d0; background: #f0fdf4; }
+  #note.err { color: #b91c1c; border-color: #fecaca; background: #fef2f2; }
+  .actions { display: flex; gap: 8px; }
+  .actions button { flex: 1; height: 34px; border-radius: 8px; font-size: 13px; cursor: pointer; border: 1px solid transparent; }
+  #btn-check { background: #fff; border-color: #e2e8f0; color: #475569; }
+  #btn-check:hover { border-color: #93c5fd; color: #1d4ed8; }
+  #btn-apply { background: linear-gradient(180deg,#3b82f6,#2563eb); color: #fff; font-weight: 600; }
+  #btn-apply:disabled { opacity: .45; cursor: default; }
+</style>
+</head>
+<body>
+  <div id="wrap">
+    <h1>检查更新</h1>
+    <div class="sub">只更新程序文件（约几百 KB），不用重新下载安装包</div>
+
+    <div id="progress-wrap">
+      <div id="bar"><i id="bar-fill"></i></div>
+      <div id="bar-text">0%</div>
+    </div>
+
+    <div class="row"><span class="k">当前版本</span><span class="v" id="cur">—</span></div>
+    <div class="row"><span class="k">最新版本</span><span class="v" id="latest">—</span></div>
+
+    <!-- 更新源已内置为 Gitee，界面不再显示 -->
+    <input id="feed" type="hidden" value="">
+    <span id="feed-state" style="display:none;"></span>
+
+    <div id="note">点「检查更新」看看有没有新版本。</div>
+
+    <div class="actions">
+      <button id="btn-check">检查更新</button>
+      <button id="btn-apply" disabled>立即更新</button>
+    </div>
+    <div class="actions" style="margin-top:8px;">
+      <button id="btn-file" style="background:#fff;border-color:#e2e8f0;color:#475569;">从本地文件更新…</button>
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:#94a3b8;line-height:1.6;">
+      没有更新源也能用：作者把 xbu-x.x.x.zip 发给你，点上面按选择文件即可。
+    </div>
+  </div>
+
+  <script src="./updater.js"></script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>定时提醒</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    background: transparent;
+    overflow: hidden;
+    user-select: none;
+  }
+  #card {
+    height: 100%;
+    background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+    border: 1px solid rgba(251,191,36,.45);
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(0,0,0,.45);
+    color: #e5e7eb;
+    padding: 12px 14px;
+    display: flex; flex-direction: column;
+    animation: slideIn .25s ease-out;
+  }
+  @keyframes slideIn {
+    from { transform: translateX(-12px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  #head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  #head .icon { font-size: 18px; }
+  #head .title { font-size: 13px; font-weight: 600; color: #fcd34d; }
+  #head .x {
+    margin-left: auto; width: 18px; height: 18px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #9ca3af; cursor: pointer; font-size: 14px;
+  }
+  #head .x:hover { background: rgba(255,255,255,.12); color: #fff; }
+
+  #body { font-size: 12px; line-height: 1.6; overflow: hidden; }
+  .row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 4px; }
+  .row .b {
+    color: #f9fafb; font-weight: 600;
+    max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .row .d { color: #fca5a5; font-family: Consolas, monospace; font-size: 11px; }
+  .row .a { color: #93c5fd; font-size: 11px; }
+  .row .d.warn { color: #fdba74; }
+  .row .d.hot { color: #f87171; font-weight: 600; }
+  #more { color: #9ca3af; font-size: 11px; margin-top: 2px; }
+  #foot { margin-top: 8px; font-size: 11px; color: #9ca3af; }
+  #foot b { color: #fcd34d; font-weight: 500; }
+</style>
+</head>
+<body>
+  <div id="card">
+    <div id="head">
+      <span class="icon">⏰</span>
+      <span class="title" id="title">今天是最后的定时发布日</span>
+      <span class="x" id="close">×</span>
+    </div>
+    <div id="body"></div>
+    <div id="foot">点这里打开<b>提醒窗口</b>查看全部</div>
+  </div>
+
+  <script src="./toast.js"></script>
+</body>
+</html>

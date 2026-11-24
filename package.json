@@ -7,7 +7,7 @@
   "license": "MIT",
   "main": "app/main.js",
   "scripts": {
-    "start": "electron .",
+    "start": "electron app",
     "build:mac": "electron-builder --mac dmg --x64 --arm64 --publish never"
   },
   "devDependencies": {
@@ -19,16 +19,16 @@
     "productName": "阿p全自动发布工具",
     "asar": true,
     "npmRebuild": false,
-    "files": [
-      "app/**/*",
-      "package.json",
-      "!**/*.pem",
-      "!**/*.log"
-    ],
     "directories": {
+      "app": "app",
       "buildResources": "build",
       "output": "dist"
     },
+    "files": [
+      "**/*",
+      "!**/*.pem",
+      "!**/*.log"
+    ],
     "artifactName": "ap-uploader-${version}-mac-${arch}.${ext}",
     "mac": {
       "category": "public.app-category.productivity",

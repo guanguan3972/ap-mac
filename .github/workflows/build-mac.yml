@@ -1,5 +1,6 @@
 name: build-mac-dmg
 
+# 手动点一下就能出 dmg；打 tag（v2.9.58 这种）也会自动出
 on:
   workflow_dispatch:
   push:
@@ -9,7 +10,7 @@ on:
 jobs:
   mac:
     runs-on: macos-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
 
     steps:
       - name: 拉代码
@@ -18,24 +19,51 @@ jobs:
       - name: 装 Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: 安装依赖
-        run: npm install
+        run: npm install --no-audit --no-fund
+
+      - name: 环境信息
+        run: |
+          node -v
+          npm -v
+          sw_vers
+          npx electron-builder --version || true
 
       - name: 打包 dmg（Intel + Apple 芯片）
         env:
+          # 没有苹果开发者证书：关掉自动签名，出未签名 dmg
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-        run: npx electron-builder --mac dmg --x64 --arm64 --publish never
+          DEBUG: electron-builder
+        run: |
+          set -o pipefail
+          npx electron-builder --mac dmg --x64 --arm64 --publish never 2>&1 | tee build.log
+
+      - name: 失败时按架构单独再试一次
+        if: failure()
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: |
+          npx electron-builder --mac dmg --arm64 --publish never 2>&1 | tee -a build.log || true
+          npx electron-builder --mac dmg --x64  --publish never 2>&1 | tee -a build.log || true
+
+      - name: 把失败原因标到注解（方便远程排查）
+        if: failure()
+        run: |
+          echo "::error::$(grep -a -i -E '⨯|error|cannot|failed|not found|ENOENT' build.log | tail -n 10 | tr '\n' '~' | cut -c1-1600)"
 
       - name: 列出产物
-        run: ls -lh dist
+        if: always()
+        run: ls -lh dist || true
 
       - name: 上传 dmg
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ap-mac-dmg
           path: |
             dist/*.dmg
             dist/*.blockmap
-          if-no-files-found: error
+            build.log
+          if-no-files-found: warn
